@@ -1,0 +1,38 @@
+RELEASE NOTE: PRMS 1.2.x
+
+1. PER INTERNAL AUDIT REQUIREMENTS NOV 2023.
+2.
+
+
+
+CREDITS:
+AUTHOR: JHONG MEDINA - MIS SUPERVISOR JUNE142024
+
+1.1.1 - Alpha
+    a. Restructed Database added the following table:
+            New Table -  tbl_folio
+                         tbl_charges
+            Revised - tbl_range_sched
+                a.added new fields for charges
+                    bucket_used int(11) 
+                    prange_chargesid int(11) 
+                    prange_charges varchar(200) 
+                    pr_quantity int(11) 
+                    pr_amount decimal(6,2) 
+                    target_out varchar(45)
+
+1.1.2 - Beta
+        Recommendation and Comments:
+
+        Folio Check-in from 5am – 6am
+        30mins Charging
+        1 Bucket Warm-up (15minutes)
+        Folio Card for Seniors
+
+
+1.1.3 - Launch
+        Error Encounter with ñ and Ñ
+        
+1.1.4 - Patch 
+        a. Release Patch for Folio_Connect 1.0.4
+
