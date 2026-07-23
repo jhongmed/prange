@@ -94,7 +94,7 @@ unset($_SESSION['datereport']);
                     <div class="page-logo">
                         <a href="#" class="page-logo-link press-scale-down d-flex align-items-center position-relative">
                             <!--<img src="img/logo.png" alt="SmartAdmin WebApp" aria-roledescription="logo">-->
-                            <span class="page-logo-text mr-1">PRMS 1.4.1 </span>
+                            <span class="page-logo-text mr-1">PRMS 1.4.2 </span>
                         </a>
                     </div>
                     <!-- BEGIN PRIMARY NAVIGATION -->

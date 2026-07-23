@@ -30,8 +30,8 @@ $columns = array(
  
 // SQL server connection information
 $sql_details = array(
-    'user' => 'root',
-    'pass' => '',
+    'user' => 'prangedb',
+    'pass' => 'OrchardM!S2024',
     'db'   => 'db_prange1',
     'host' => '128.168.64.26'
 );

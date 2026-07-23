@@ -1,10 +1,17 @@
 <?php
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ob_start();
+
 session_start();
 if (isset($_GET['datereport'])) {
 	$_SESSION['datereport'] = $_GET['datereport'];
 }
 
 include 'dbconnection.php';
+
+// Ensure correct character encoding for reads (fixes garbled names like Ñ, é, etc.)
+$mysqli->set_charset("utf8mb4");
 
 $table = 'datatable_range_sched';
 $primaryKey = 'id';
@@ -29,14 +36,6 @@ $columns = array(
 	array('db' => 'senior', 'dt' => 14),
 	array('db' => 'complimentary', 'dt' => 15),
 	array('db' => 'FED', 'dt' => 16),
-
-	//heres' the old index
-	// array('db' => 'unlirange', 'dt' => 16),
-	// array('db' => 'pr_amount', 'dt' => 17), // TOTAL moved here
-	// array('db' => 'revenue', 'dt' => 18),
-	// array('db' => 'date_stamp', 'dt' => 19),
-	// array('db' => 'user', 'dt' => 20)
-
 	array('db' => 'unlirange', 'dt' => 17),
 	array('db' => 'pr_amount', 'dt' => 18), // TOTAL moved here
 	array('db' => 'revenue', 'dt' => 19),
@@ -45,8 +44,8 @@ $columns = array(
 );
 
 $sql_details = array(
-	'user' => 'root',
-	'pass' => '',
+	'user' => 'prangedb',
+	'pass' => 'OrchardM!S2024',
 	'db'   => 'db_prange1',
 	'host' => '128.168.64.26'
 );
@@ -69,7 +68,18 @@ if (isset($_SESSION['datereport'])) {
 foreach ($output['data'] as $i => $d) {
 	$id = $output['data'][$i][0];
 	$result = $mysqli->query("SELECT * FROM tbl_range_sched WHERE id='$id'");
+
+	if ($result === false) {
+		error_log("rangeres.php: query failed for id=$id: " . $mysqli->error);
+		continue;
+	}
+
 	$row = mysqli_fetch_assoc($result);
+
+	if ($row === null) {
+		error_log("rangeres.php: no tbl_range_sched row found for id=$id");
+		continue;
+	}
 
 	// Format total hours
 	$output['data'][$i][7] = isset($output['data'][$i][7]) ? number_format($output['data'][$i][7], 2, '.', ',') : '';
@@ -136,14 +146,25 @@ $countResult = $mysqli->query($countQuery);
 
 $memberCount = 0;
 $guestCount = 0;
-while ($rowCount = mysqli_fetch_assoc($countResult)) {
-	if ($rowCount['status1'] == 'MEMBER') $memberCount = $rowCount['total'];
-	if ($rowCount['status1'] == 'GUEST') $guestCount = $rowCount['total'];
+
+if ($countResult !== false) {
+	while ($rowCount = mysqli_fetch_assoc($countResult)) {
+		if ($rowCount['status1'] == 'MEMBER') $memberCount = $rowCount['total'];
+		if ($rowCount['status1'] == 'GUEST') $guestCount = $rowCount['total'];
+	}
+} else {
+	error_log("rangeres.php: count query failed: " . $mysqli->error);
 }
 
 // ADD TO OUTPUT
 $output['memberTotal'] = $memberCount;
 $output['guestTotal'] = $guestCount;
 
-// RETURN JSON
-echo json_encode($output);
+// Discard any accidental stray output (warnings, whitespace, etc.)
+ob_end_clean();
+header('Content-Type: application/json');
+
+// JSON_INVALID_UTF8_SUBSTITUTE fixes the root bug: previously, any row with
+// malformed UTF-8 (e.g. corrupted "Ñ" characters) caused json_encode() to
+// silently fail and return false, sending an empty response to DataTables.
+echo json_encode($output, JSON_INVALID_UTF8_SUBSTITUTE);
